@@ -989,7 +989,7 @@ async function handleTxtFiles(files){
 
 function readTxt(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsText(file); }); }
 
-const BACKEND_URL = 'https://quiz-backend-69z70ifou-notemind763-2834s-projects.vercel.app';
+const BACKEND_URL = 'https://quiz-backend-lemon.vercel.app';
 
 async function onFilePdf(e){
   const file = e.target.files[0]; 
