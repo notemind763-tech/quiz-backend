@@ -67,13 +67,13 @@ def extract_pdf_text(file_bytes: bytes) -> str:
     text_parts = []
     if PDF_ENGINE == "pdfplumber":
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-            for page in pdf.pages:
+            for page in pdf.pages[:100]:
                 t = page.extract_text(x_tolerance=2, y_tolerance=2)
                 if t:
                     text_parts.append(t)
     else:
         reader = PdfReader(io.BytesIO(file_bytes))
-        for page in reader.pages:
+        for page in reader.pages[:100]:
             t = page.extract_text()
             if t:
                 text_parts.append(t)
@@ -185,9 +185,11 @@ async def extract_questions(file: UploadFile = File(...)):
         raise HTTPException(400, "File is empty or corrupted.")
     logger.info(f"📄 PDF received: {file.filename} ({size_mb:.2f}MB)")
     start = time.time()
-    try:
+        try:
         full_text = extract_pdf_text(contents)
+        logger.info(f"✅ Text extracted: {len(full_text)} chars")
     except Exception as e:
+        logger.error(f"❌ PDF extraction failed: {e}", exc_info=True)
         raise HTTPException(422, f"Could not read PDF: {str(e)}")
     if not full_text or len(full_text) < 50:
         raise HTTPException(422, "PDF has no readable text.")
