@@ -707,7 +707,11 @@ function xpFloat(txt){
   document.body.appendChild(e); setTimeout(()=>e.remove(),1500);
 }
 function openMo(id){ I(id).classList.add('show'); }
-function closeMo(id){ I(id).classList.remove('show'); }
+function closeMo(id){ 
+  I(id).classList.remove('show');
+  const st=I('fileStatus'); if(st){st.style.display='none';st.textContent='';}
+  const ist=I('importSt'); if(ist){ist.style.display='none';ist.textContent='';}
+}
 
 // ============================================================
 // INIT — safe Supabase init inside window.load
