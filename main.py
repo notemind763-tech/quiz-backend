@@ -15,7 +15,8 @@ except ImportError:
     from pypdf import PdfReader
     PDF_ENGINE = "pypdf"
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("quizlab")
@@ -102,11 +103,14 @@ def chunk_text(text: str, max_chars: int = MAX_TEXT_CHARS) -> list[str]:
 
 def call_gemini(text: str) -> list:
     api_key = os.environ.get("GEMINI_API_KEY")
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
-    response = model.generate_content(
-        SYSTEM_PROMPT + "\n\n" + USER_PROMPT_TEMPLATE.format(text=text),
-        generation_config={"temperature": 0.1, "max_output_tokens": 8192}
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=SYSTEM_PROMPT + "\n\n" + USER_PROMPT_TEMPLATE.format(text=text),
+        config=types.GenerateContentConfig(
+            temperature=0.1,
+            max_output_tokens=8192
+        )
     )
     raw = response.text.strip()
     raw = re.sub(r'^```(?:json)?\s*', '', raw, flags=re.MULTILINE)
@@ -121,7 +125,6 @@ def call_gemini(text: str) -> list:
             if isinstance(v, list):
                 return v
     return parsed if isinstance(parsed, list) else []
-
 
 def validate_and_clean(questions: list) -> list:
     cleaned = []
