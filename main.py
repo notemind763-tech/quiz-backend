@@ -46,8 +46,8 @@ app.add_middleware(
 # ── Config ───────────────────────────────────────────────────────────────────
 MAX_FILE_MB   = 20
 MAX_TEXT_CHARS = 12000   # Per Groq context window — we chunk if longer
-GROQ_MODEL    = "llama3-70b-8192"   # Better accuracy than 8b; still free
-FALLBACK_MODEL = "llama3-8b-8192"  # Used if 70b quota hit
+GROQ_MODEL    = "llama-3.3-70b-versatile"   # Better accuracy than 8b; still free
+FALLBACK_MODEL = "llama-3.1-8b-instant"  # Used if 70b quota hit
 
 
 # ── PDF Text Extraction ──────────────────────────────────────────────────────
