@@ -292,7 +292,7 @@ async def extract_questions(file: UploadFile = File(...)):
 
         # Groq rate limit: 30 req/min on free tier — add small delay between chunks
         if chunk_idx < len(chunks) - 1:
-            time.sleep(1)
+            time.sleep(3)
 
     # ── 5. Validate + deduplicate ────────────────────────────
     final_questions = validate_and_clean(all_questions)
