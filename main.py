@@ -45,7 +45,7 @@ app.add_middleware(
 
 # ── Config ───────────────────────────────────────────────────────────────────
 MAX_FILE_MB   = 20
-MAX_TEXT_CHARS = 12000   # Per Groq context window — we chunk if longer
+MAX_TEXT_CHARS = 30000   # Per Groq context window — we chunk if longer
 GROQ_MODEL    = "llama-3.3-70b-versatile"   # Better accuracy than 8b; still free
 FALLBACK_MODEL = "llama-3.1-8b-instant"  # Used if 70b quota hit
 
@@ -57,13 +57,13 @@ def extract_pdf_text(file_bytes: bytes) -> str:
 
     if PDF_ENGINE == "pdfplumber":
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-            for page in pdf.pages[:100]:
+            for page in pdf.pages[:200]:
                 t = page.extract_text(x_tolerance=2, y_tolerance=2)
                 if t:
                     text_parts.append(t)
     else:
         reader = PdfReader(io.BytesIO(file_bytes))
-        for page in reader.pages[:100]:
+        for page in reader.pages[:200]:
             t = page.extract_text()
             if t:
                 text_parts.append(t)
@@ -292,7 +292,7 @@ async def extract_questions(file: UploadFile = File(...)):
 
         # Groq rate limit: 30 req/min on free tier — add small delay between chunks
         if chunk_idx < len(chunks) - 1:
-            time.sleep(2)
+            time.sleep(1)
 
     # ── 5. Validate + deduplicate ────────────────────────────
     final_questions = validate_and_clean(all_questions)
