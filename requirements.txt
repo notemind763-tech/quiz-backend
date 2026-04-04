@@ -5,3 +5,4 @@ pypdf
 pdfplumber
 python-multipart
 groq
+google-generativeai
