@@ -200,7 +200,7 @@ async def extract_questions(file: UploadFile = File(...)):
     warnings = []
     for chunk_idx, chunk in enumerate(chunks):
         logger.info(f"🤖 Processing chunk {chunk_idx + 1}/{len(chunks)}")
-        try:
+    try:
             raw_qs = call_gemini(chunk)
             all_questions.extend(raw_qs)
         except Exception as e:
