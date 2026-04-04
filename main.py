@@ -311,6 +311,22 @@ async def extract_questions(file: UploadFile = File(...)):
         "pdf_engine": PDF_ENGINE,
         "warnings": warnings,
     }
+@app.post("/api/parse-text")
+async def parse_text(request: Request):
+    body = await request.json()
+    raw_text = body.get("text", "")
+    if not raw_text or len(raw_text) < 20:
+        raise HTTPException(400, "No text provided.")
+    
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise HTTPException(500, "GROQ_API_KEY not set.")
+    
+    client = Groq(api_key=api_key)
+    raw_qs = call_groq(client, raw_text[:8000], GROQ_MODEL)
+    final = validate_and_clean(raw_qs)
+    
+    return {"success": True, "count": len(final), "data": final}
 
 
 # ── Global error handler ──────────────────────────────────────────────────────
