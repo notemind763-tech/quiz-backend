@@ -4,4 +4,4 @@ pypdf
 pdfplumber
 python-multipart
 groq
-google-generativeai
+google-genai
