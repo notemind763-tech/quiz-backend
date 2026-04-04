@@ -368,6 +368,7 @@ button{cursor:pointer}
     <div class="imp-status" id="importSt"></div>
     <div style="display:flex;gap:8px">
       <button class="btn-primary" onclick="doImport()">✅ Import</button>
+      <button class="btn-secondary" onclick="doAiImport()" id="aiImportBtn">🤖 AI Parse</button>
       <button class="btn-secondary" onclick="closeMo('importMo')">Cancel</button>
     </div>
     <p style="color:var(--t3);font-size:.72rem;margin-top:10px;line-height:1.5">JSON format: <code style="background:var(--s2);padding:1px 4px;border-radius:3px">[{q,o:{A,B,C,D},c,e,d,sec,sub}]</code></p>
@@ -1603,6 +1604,47 @@ async function submitFeedback(){
       fbRating=0;
     },400);
   },2500);
+}
+async function doAiImport(){
+  const raw = I('pasteIn').value.trim();
+  const st = I('importSt');
+  if(!raw){ st.style.display='block'; st.className='imp-status err'; st.textContent='Nothing to parse.'; return; }
+  const btn = I('aiImportBtn');
+  btn.disabled = true; btn.textContent = '🤖 AI thinking...';
+  st.style.display='block'; st.className='imp-status info'; st.textContent='🤖 AI is reading your questions...';
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        messages:[{
+          role:'user',
+          content:`Extract all MCQ questions from the text below. Return ONLY a JSON array, no explanation, no markdown.
+Format: [{"q":"question text","o":{"A":"option","B":"option","C":"option","D":"option"},"c":"B","e":"explanation why correct","d":3,"sec":"Topic"}]
+Rules: only extract real questions with 4 options and a correct answer. Strip out percentages like (76%) from option text.
+TEXT:\n${raw.slice(0,8000)}`
+        }]
+      })
+    });
+    const data = await response.json();
+    let text = data.content?.[0]?.text || '';
+    text = text.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+    const parsed = JSON.parse(text);
+    if(!Array.isArray(parsed)||!parsed.length) throw new Error('No questions found');
+    const cleaned = parsed.map((q,i)=>normQ(q,i)).filter(q=>q.q&&q.c);
+    if(!cleaned.length) throw new Error('Could not extract valid questions');
+    const name = I('setNameIn').value.trim() || `AI Import ${qSets.length+1}`;
+    await importParsed(cleaned, name);
+    st.style.display='none';
+    toast(`🤖 AI extracted ${cleaned.length} questions!`,'ok');
+  } catch(err){
+    st.className='imp-status err';
+    st.textContent='❌ AI parse failed: '+err.message;
+  } finally {
+    btn.disabled=false; btn.textContent='🤖 AI Parse';
+  }
 }
 </script>
 </body>
