@@ -185,7 +185,7 @@ async def extract_questions(file: UploadFile = File(...)):
         raise HTTPException(400, "File is empty or corrupted.")
     logger.info(f"📄 PDF received: {file.filename} ({size_mb:.2f}MB)")
     start = time.time()
-        try:
+    try:
         full_text = extract_pdf_text(contents)
         logger.info(f"✅ Text extracted: {len(full_text)} chars")
     except Exception as e:
